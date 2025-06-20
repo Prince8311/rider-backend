@@ -23,6 +23,12 @@ if($requestMethod == 'POST') {
 
     if(!empty($inputData)) {
         $otp = mysqli_real_escape_string($conn, $inputData['otp']);
+        $data = [
+            'status' => 200,
+            'userId' => $userId
+        ];
+        header("HTTP/1.0 200 OK");
+        echo json_encode($data);
     } else {
         $data = [
             'status' => 400,
