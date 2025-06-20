@@ -31,7 +31,7 @@ if($requestMethod == 'POST') {
         $savedOtp = $row['mail_otp'];
 
         if($savedOtp == $otp) {
-            $authToken = bin2hex(random_bytes(32));
+            $authToken = bin2hex(random_bytes(64));
             setcookie("authToken", $authToken, time() + 86400, "/", "ticketbay.in", true, true);
 
             $data = [
@@ -45,8 +45,7 @@ if($requestMethod == 'POST') {
         } else {
             $data = [
                 'status' => 404,
-                'message' => 'Wrong OTP',
-                'token' => $token
+                'message' => 'Wrong OTP'
             ];
             header("HTTP/1.0 404 Wrong OTP");
             echo json_encode($data);
