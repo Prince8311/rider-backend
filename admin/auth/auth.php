@@ -41,6 +41,7 @@ if($requestMethod == 'POST') {
             while($row = mysqli_fetch_assoc($result)){
                 if(password_verify($password,$row['password'])){
                     $userId = $row['id'];
+                    $userEmail = $row['email'];
                     $otp = rand(100000, 999999);
                     $otpPart1 = substr($otp, 0, 3);
                     $otpPart2 = substr($otp, 3, 3);
@@ -58,7 +59,7 @@ if($requestMethod == 'POST') {
 
                         $mail->isHTML(true);  
                         $mail->setFrom('noreply@ticketbay.in', 'noreply@ticketbay.in');
-                        $mail->addAddress("$email", 'User');    
+                        $mail->addAddress("$userEmail", 'User');    
                         $mail->Subject = 'OTP for Authentication';
                         $mail->Body    = '<!DOCTYPE html>
                                     <html lang="en">
@@ -140,7 +141,7 @@ if($requestMethod == 'POST') {
         header("HTTP/1.0 400 Validation failed");
         echo json_encode($data);
     }
-    
+
 } else{
     $data = [
         'status' => 405,
