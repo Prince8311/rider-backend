@@ -29,12 +29,23 @@ if($requestMethod == 'GET') {
     } else {
         $sql = "SELECT * FROM `users` WHERE `user_type`='user'";
         $result = mysqli_query($conn, $sql);
-        $res = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        $totalUsers = mysqli_num_rows($result);
+        $limit = 10; 
+        $page = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0
+        ? (int)$_GET['page']
+        : 1;
+        $offset = ($page - 1) * $limit;
+
+        $limitSql = "SELECT * FROM `users` WHERE `user_type`='user' LIMIT $limit OFFSET $offset";
+        $limitResult = mysqli_query($conn, $limitSql);
+        $users = mysqli_fetch_all($limitResult, MYSQLI_ASSOC);
 
         $data = [
             'status' => 200,
             'message' => 'User list fetched',
-            'users' => $res
+            'totalCount' => $totalUsers,
+            'currentPage' => $page,
+            'users' => $users,
         ];
         header("HTTP/1.0 200 User list fetched");
         echo json_encode($data);
