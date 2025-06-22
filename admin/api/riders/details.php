@@ -29,24 +29,24 @@ if($requestMethod == 'GET') {
     } else {
         if(isset($_GET['id'])) {
             $userId = mysqli_real_escape_string($conn, $_GET['id']);
-            $sql = "SELECT * FROM `users` WHERE `id`='$userId' AND `user_type`='user'";
+            $sql = "SELECT * FROM `users` WHERE `id`='$userId' AND `user_type`='rider'";
             $result = mysqli_query($conn, $sql);
             if(mysqli_num_rows($result) === 1) {
                 $res = mysqli_fetch_assoc($result);
                 $data = [
                     'status' => 200,
-                    'message' => 'User details fetched',
+                    'message' => 'Rider details fetched',
                     'user' => $res
                 ];
-                header("HTTP/1.0 200 User details fetched");
+                header("HTTP/1.0 200 Rider details fetched");
                 echo json_encode($data);
             } else {
                 $data = [
                     'status' => 400,
-                    'message' => 'No user found',
+                    'message' => 'No rider found',
                     'user' => $res
                 ];
-                header("HTTP/1.0 400 No user found");
+                header("HTTP/1.0 400 No rider found");
                 echo json_encode($data);
             }
         } else {
