@@ -22,18 +22,20 @@ if($requestMethod == 'GET') {
 
     $authHeader = getAuthorizationHeader();
     $cookieToken = $_COOKIE['authToken'] ?? '';
+    file_put_contents('auth_debug.log', "Header: " . var_export($authHeader, true) . PHP_EOL, FILE_APPEND);
 
     if (!isset($cookieToken) || empty($cookieToken)) {
         $data = [
             'status' => 401,
-            'message' => 'Authentication error'
+            'message' => 'Authentication error',
+            'all_headers' => getallheaders()
         ];
         header("HTTP/1.0 401 Authentication error");
         echo json_encode($data);
         exit;
     } 
 
-    if (!$authHeader) {
+    if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
         $data = [
             'status' => 401,
             'message' => 'Missing or malformed Authorization token',
