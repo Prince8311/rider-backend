@@ -13,7 +13,7 @@ if ($requestMethod == 'OPTIONS') {
     exit();
 }
 
-require_once "../../utils/auth-helper.php";
+require_once "../../../utils/auth-helper.php";
 
 if($requestMethod == 'GET') {
 
