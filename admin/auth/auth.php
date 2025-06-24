@@ -6,7 +6,8 @@ error_reporting(0);
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Origin: http://localhost:3000');
+header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Content-Type: application/json');
 header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With');
@@ -94,7 +95,14 @@ if($requestMethod == 'POST') {
                         $updateResult = mysqli_query($conn, $updateSql);
 
                         if($result){
-                            setcookie("userId", $userId, time() + 300, "/", "localhost", false, true);
+                            setcookie("userId", $userId, [
+                                'expires' => time() + 300,
+                                'path' => '/',
+                                'domain' => 'riderbackend.ticketbay.in',
+                                'secure' => true,
+                                'httponly' => true,
+                                'samesite' => 'None'
+                            ]);
                             $data = [
                                 'status' => 200,
                                 'message' => 'OTP has been sent',
