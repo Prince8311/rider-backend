@@ -33,7 +33,7 @@ if($requestMethod == 'GET') {
         exit;
     } 
 
-    if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+    if (!$authHeader) {
         $data = [
             'status' => 401,
             'message' => 'Missing or malformed Authorization token',
