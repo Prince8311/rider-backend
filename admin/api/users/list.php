@@ -13,7 +13,7 @@ if ($requestMethod == 'OPTIONS') {
     exit();
 }
 
-require_once "../../../utils/auth-helper.php";
+require "../../../utils/auth-helper.php";
 
 if($requestMethod == 'GET') {
 
@@ -39,7 +39,6 @@ if($requestMethod == 'GET') {
             ];
             header("HTTP/1.0 401 Unauthorized");
             echo json_encode($data);
-            exit;
         } else {
             $frontendToken = $matches[1];
             if (empty($cookieToken) || $cookieToken !== $frontendToken) {
