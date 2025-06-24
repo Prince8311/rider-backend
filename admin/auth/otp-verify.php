@@ -50,7 +50,8 @@ if($requestMethod == 'POST') {
                 'message' => 'Wrong OTP',
                 'myOtp' => $otp,
                 'savedOtp' => $savedOtp,
-                'userId' => $userId
+                'userId' => $userId,
+                'receivedCookies' => $_COOKIE,
             ];
             header("HTTP/1.0 404 Wrong OTP");
             echo json_encode($data);
