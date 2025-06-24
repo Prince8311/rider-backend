@@ -47,7 +47,7 @@ if($requestMethod == 'POST') {
             $clearResult = mysqli_query($conn, $clearOtpSql);
             $data = [
                 'status' => 200,
-                'message' => 'Login Success',
+                'message' => 'Authectication Successful',
                 'userId' => $userId,
                 'authToken' => $authToken
             ];
