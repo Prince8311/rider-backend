@@ -20,7 +20,7 @@ if($requestMethod == 'POST') {
     require "../../_db-connect.php";
     global $conn;
 
-    $userId = $_COOKIE['userId'] ?? '';
+    $userId = $_SESSION['userId'] ?? '';
     $inputData = json_decode(file_get_contents("php://input"), true);
 
     if(!empty($inputData)) {
