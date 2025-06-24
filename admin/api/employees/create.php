@@ -51,14 +51,12 @@ if($requestMethod == 'POST') {
                     $insertResult = mysqli_query($conn, $insertSql);
 
                     if($insertResult) {
-
                         $data = [
                             'status' => 200,
                             'message' => 'Admin user created'
                         ];
                         header("HTTP/1.0 200 Admin created");
                         echo json_encode($data);
-
                     } else {
                         $data = [
                             'status' => 500,

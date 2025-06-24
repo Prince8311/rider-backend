@@ -30,24 +30,34 @@ if($requestMethod == 'POST') {
         $row = mysqli_fetch_assoc($result);
         $savedOtp = $row['mail_otp'];
 
-        if($savedOtp == $otp) {
-            $authToken = bin2hex(random_bytes(64));
-            setcookie("authToken", $authToken, time() + 86400, "/", "ticketbay.in", true, true);
-
-            $data = [
-                'status' => 200,
-                'message' => 'Login Success',
-                'userId' => $userId,
-                'authToken' => $authToken
-            ];
-            header("HTTP/1.0 200 OK");
-            echo json_encode($data);
+        if($savedOtp !== null) {
+            if($savedOtp == $otp) {
+                $authToken = bin2hex(random_bytes(64));
+                setcookie("authToken", $authToken, time() + 86400, "/", "ticketbay.in", true, true);
+                $clearOtpSql = "UPDATE `users` SET `mail_otp` = NULL WHERE `id` = '$userId'";
+                $clearResult = mysqli_query($conn, $clearOtpSql);
+                $data = [
+                    'status' => 200,
+                    'message' => 'Login Success',
+                    'userId' => $userId,
+                    'authToken' => $authToken
+                ];
+                header("HTTP/1.0 200 OK");
+                echo json_encode($data);
+            } else {
+                $data = [
+                    'status' => 404,
+                    'message' => 'Wrong OTP'
+                ];
+                header("HTTP/1.0 404 Wrong OTP");
+                echo json_encode($data);
+            }
         } else {
             $data = [
-                'status' => 404,
-                'message' => 'Wrong OTP'
+                'status' => 401,
+                'message' => 'Authentication error'
             ];
-            header("HTTP/1.0 404 Wrong OTP");
+            header("HTTP/1.0 401 Authentication error");
             echo json_encode($data);
         }
     } else {
