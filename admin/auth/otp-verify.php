@@ -30,7 +30,7 @@ if($requestMethod == 'POST') {
         $row = mysqli_fetch_assoc($result);
         $savedOtp = $row['mail_otp'];
 
-        if($savedOtp !== null) {
+        if($savedOtp != null) {
             if($savedOtp == $otp) {
                 $authToken = bin2hex(random_bytes(64));
                 setcookie("authToken", $authToken, time() + 86400, "/", "ticketbay.in", true, true);
