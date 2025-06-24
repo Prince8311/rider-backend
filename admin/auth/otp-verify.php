@@ -1,8 +1,7 @@
 <?php 
 
 session_start();
-header('Access-Control-Allow-Origin: http://localhost:3000');
-header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Content-Type: application/json');
 header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With');
@@ -20,7 +19,7 @@ if($requestMethod == 'POST') {
     require "../../_db-connect.php";
     global $conn;
 
-    $userId = $_SESSION['userId'];
+    $userId = $_COOKIE['userId'] ?? '';
     $inputData = json_decode(file_get_contents("php://input"), true);
 
     if(!empty($inputData)) {
@@ -33,7 +32,7 @@ if($requestMethod == 'POST') {
 
         if($savedOtp == $otp) {
             $authToken = bin2hex(random_bytes(64));
-            setcookie("authToken", $authToken, time() + 86400, "/", "ticketbay.in", true, true);
+            setcookie("authToken", $authToken, time() + 86400, "/", "https://riderbackend.ticketbay.in", true, true);
             $clearOtpSql = "UPDATE `users` SET `mail_otp` = NULL WHERE `id` = '$userId'";
             $clearResult = mysqli_query($conn, $clearOtpSql);
             $data = [

@@ -94,7 +94,7 @@ if($requestMethod == 'POST') {
                         $updateResult = mysqli_query($conn, $updateSql);
 
                         if($result){
-                            $_SESSION['userId'] = $userId;
+                            setcookie("userId", $userId, time() + 600, "/", "https://riderbackend.ticketbay.in", true, true);
                             $data = [
                                 'status' => 200,
                                 'message' => 'OTP has been sent',
