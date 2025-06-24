@@ -31,6 +31,15 @@ if($requestMethod == 'POST') {
         $row = mysqli_fetch_assoc($result);
         $savedOtp = $row['mail_otp'];
 
+        if($savedOtp === null) {
+            $data = [
+                'status' => 401,
+                'message' => 'Authentication error'
+            ];
+            header("HTTP/1.0 401 Authentication error");
+            echo json_encode($data);
+        }
+
         if($savedOtp == $otp) {
             $authToken = bin2hex(random_bytes(64));
             setcookie("authToken", $authToken, time() + 86400, "/", ".ticketbay.in", true, true);
