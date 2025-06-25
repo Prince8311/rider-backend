@@ -21,13 +21,10 @@ if($requestMethod == 'GET') {
     require "../../../_db-connect.php";
     global $conn;
 
-    $authHeader = getAuthorizationHeader();
-    $cookieToken = $_COOKIE['authToken'] ?? '';
-
     $data = [
         'status' => 200,
         'message' => 'Authenticated',
-        'authToken' => $cookieToken
+        'authToken' => '23456789009987'
     ];
     header("HTTP/1.0 200 Authenticated");
     echo json_encode($data);
