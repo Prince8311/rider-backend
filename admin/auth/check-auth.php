@@ -24,22 +24,13 @@ if($requestMethod == 'GET') {
     $authHeader = getAuthorizationHeader();
     $cookieToken = $_COOKIE['authToken'] ?? '';
 
-    if (!isset($cookieToken) || empty($cookieToken)) {
-        $data = [
-            'status' => 401,
-            'message' => 'Authentication error'
-        ];
-        header("HTTP/1.0 401 Authentication error");
-        echo json_encode($data);
-    } else {
-        $data = [
-            'status' => 200,
-            'message' => 'Authenticated',
-            'authToken' => $cookieToken
-        ];
-        header("HTTP/1.0 200 Authenticated");
-        echo json_encode($data);
-    }
+    $data = [
+        'status' => 200,
+        'message' => 'Authenticated',
+        'authToken' => $cookieToken
+    ];
+    header("HTTP/1.0 200 Authenticated");
+    echo json_encode($data);
 
 } else{
     $data = [
