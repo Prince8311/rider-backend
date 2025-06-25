@@ -15,7 +15,7 @@ if ($requestMethod == 'OPTIONS') {
 
 if($requestMethod == 'GET') {
 
-    require "../../../_db-connect.php";
+    require "../../_db-connect.php";
     global $conn;
 
     $data = [
