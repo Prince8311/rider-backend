@@ -13,8 +13,6 @@ if ($requestMethod == 'OPTIONS') {
     exit();
 }
 
-require "../../../utils/auth-helper.php";
-
 if($requestMethod == 'GET') {
 
     require "../../../_db-connect.php";
