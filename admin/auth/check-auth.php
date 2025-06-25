@@ -2,6 +2,7 @@
 
 session_start();
 header('Access-Control-Allow-Origin: http://localhost:3000');
+header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Content-Type: application/json');
 header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With');
@@ -13,18 +14,51 @@ if ($requestMethod == 'OPTIONS') {
     exit();
 }
 
+require "../../../utils/auth-helper.php";
+
 if($requestMethod == 'GET') {
 
     require "../../_db-connect.php";
     global $conn;
 
-    $data = [
-        'status' => 200,
-        'message' => 'Authenticated',
-        'authToken' => '23456789009987'
-    ];
-    header("HTTP/1.0 200 Authenticated");
-    echo json_encode($data);
+    $authHeader = getAuthorizationHeader();
+    $cookieToken = $_COOKIE['authToken'] ?? '';
+
+    if (!isset($cookieToken) || empty($cookieToken)) {
+        $data = [
+            'status' => 401,
+            'message' => 'Authentication error'
+        ];
+        header("HTTP/1.0 401 Authentication error");
+        echo json_encode($data);
+    } else {
+        if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+            $data = [
+                'status' => 401,
+                'message' => 'Missing or malformed Authorization token',
+            ];
+            header("HTTP/1.0 401 Unauthorized");
+            echo json_encode($data);
+        } else {
+            $frontendToken = $matches[1];
+            if (empty($cookieToken) || $cookieToken !== $frontendToken) {
+                $data = [
+                    'status' => 401,
+                    'message' => 'Authentication mismatch',
+                ];
+                header("HTTP/1.0 401 Unauthorized");
+                echo json_encode($data);
+            } else {
+                $data = [
+                    'status' => 200,
+                    'message' => 'Authenticated',
+                    'authToken' => $authToken
+                ];
+                header("HTTP/1.0 200 Authenticated");
+                echo json_encode($data);
+            }
+        }
+    }
 
 } else{
     $data = [
