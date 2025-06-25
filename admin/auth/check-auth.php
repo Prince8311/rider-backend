@@ -14,7 +14,7 @@ if ($requestMethod == 'OPTIONS') {
     exit();
 }
 
-require "../../../utils/auth-helper.php";
+require "../../utils/auth-helper.php";
 
 if($requestMethod == 'GET') {
 
