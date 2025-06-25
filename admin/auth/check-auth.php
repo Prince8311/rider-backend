@@ -52,7 +52,7 @@ if($requestMethod == 'GET') {
                 $data = [
                     'status' => 200,
                     'message' => 'Authenticated',
-                    'authToken' => $authToken
+                    'authToken' => $cookieToken
                 ];
                 header("HTTP/1.0 200 Authenticated");
                 echo json_encode($data);
