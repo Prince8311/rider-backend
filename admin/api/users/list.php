@@ -48,7 +48,6 @@ if($requestMethod == 'GET') {
                 ];
                 header("HTTP/1.0 401 Unauthorized");
                 echo json_encode($data);
-                exit;
             } else {
                 $sql = "SELECT * FROM `users` WHERE `user_type`='user'";
                 $result = mysqli_query($conn, $sql);
