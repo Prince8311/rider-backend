@@ -51,11 +51,16 @@ if ($requestMethod == 'GET') {
             } else {
                 $sql = "SELECT rp.role_name, COUNT(u.id) AS user_count FROM ( SELECT DISTINCT role_name FROM roles_permissions) rp LEFT JOIN users u ON rp.role_name = u.user_role GROUP BY rp.role_name";
                 $result = mysqli_query($conn, $sql);
+                $roles = [];
 
                 if($result) {
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $roles[] = $row;
+                    }
                     $data = [
                         'status' => 200,
-                        'message' => 'Role list fetched.'
+                        'message' => 'Role list fetched.',
+                        'roles' => $roles
                     ];
                     header("HTTP/1.0 200 Role list");
                     echo json_encode($data);
