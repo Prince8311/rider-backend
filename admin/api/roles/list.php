@@ -1,7 +1,8 @@
-<?php 
+<?php
 
 session_start();
-header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Origin: http://localhost:3000');
+header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Content-Type: application/json');
 header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With');
@@ -13,13 +14,17 @@ if ($requestMethod == 'OPTIONS') {
     exit();
 }
 
+require "../../../utils/auth-helper.php";
 
-if($requestMethod == 'GET') {
+if ($requestMethod == 'GET') {
 
     require "../../../_db-connect.php";
     global $conn;
 
-    if (!isset($_COOKIE['authToken']) || empty($_COOKIE['authToken'])) {
+    $authHeader = getAuthorizationHeader();
+    $cookieToken = $_COOKIE['authToken'] ?? '';
+
+    if (!isset($cookieToken) || empty($cookieToken)) {
         $data = [
             'status' => 401,
             'message' => 'Authentication error'
@@ -27,29 +32,49 @@ if($requestMethod == 'GET') {
         header("HTTP/1.0 401 Authentication error");
         echo json_encode($data);
     } else {
-        $sql = "SELECT * FROM `roles_permissions`";
-        $result = mysqli_query($conn, $sql);
-
-        if(mysqli_num_rows($result) > 0) {
-            $roles = mysqli_fetch_all($result, MYSQLI_ASSOC);
-
+        if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
             $data = [
-                'status' => 200,
-                'message' => 'Roles fetched',
-                'roles' => $roles,
+                'status' => 401,
+                'message' => 'Missing or malformed Authorization token',
             ];
-            header("HTTP/1.0 200 Roles fetched");
+            header("HTTP/1.0 401 Unauthorized");
             echo json_encode($data);
+        } else {
+            $frontendToken = $matches[1];
+            if (empty($cookieToken) || $cookieToken !== $frontendToken) {
+                $data = [
+                    'status' => 401,
+                    'message' => 'Authentication mismatch',
+                ];
+                header("HTTP/1.0 401 Unauthorized");
+                echo json_encode($data);
+            } else {
+                $sql = "SELECT rp.role_name, COUNT(u.id) AS user_count FROM ( SELECT DISTINCT role_name FROM roles_permissions) rp LEFT JOIN users u ON rp.role_name = u.user_role GROUP BY rp.role_name";
+                $result = mysqli_query($conn, $sql);
+
+                if($result) {
+                    $data = [
+                        'status' => 200,
+                        'message' => 'Role list fetched.'
+                    ];
+                    header("HTTP/1.0 200 Role list");
+                    echo json_encode($data);
+                } else {
+                    $data = [
+                        'status' => 500,
+                        'message' => 'Database error: ' . $error
+                    ];
+                    header("HTTP/1.0 500 Internal Server Error");
+                    echo json_encode($data);
+                }
+            }
         }
     }
-    
-} else{
+} else {
     $data = [
         'status' => 405,
-        'message' => $requestMethod. ' Method Not Allowed',
+        'message' => $requestMethod . ' Method Not Allowed',
     ];
     header("HTTP/1.0 405 Method Not Allowed");
     echo json_encode($data);
 }
-
-?>
