@@ -24,13 +24,22 @@ if ($requestMethod == 'POST') {
     $authHeader = getAuthorizationHeader();
     $cookieToken = $_COOKIE['authToken'] ?? '';
 
-    $data = [
-        'status' => 200,
-        'message' => 'You have logged out successfylly.',
-        'token' => $cookieToken
-    ];
-    header("HTTP/1.0 200 Logged Out");
-    echo json_encode($data);
+    if (!isset($cookieToken) || empty($cookieToken)) {
+        $data = [
+            'status' => 401,
+            'message' => 'Authentication error'
+        ];
+        header("HTTP/1.0 401 Authentication error");
+        echo json_encode($data);
+    } else {
+        $data = [
+            'status' => 200,
+            'message' => 'You have logged out successfylly.',
+            'token' => $cookieToken
+        ];
+        header("HTTP/1.0 200 Logged Out");
+        echo json_encode($data);
+    }
 } else{
     $data = [
         'status' => 405,
