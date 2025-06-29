@@ -63,7 +63,7 @@ if ($requestMethod == 'POST') {
 
                         $permissionTypeEscaped = mysqli_real_escape_string($conn, $permissionType);
 
-                        $sql = "INSERT INTO `roles_permissions`(`id`, `role_name`, `permission`, `p_create`, `p_view`, `p_edit`, `p_delete`) VALUES ('$roleName', '$permissionTypeEscaped', $create, $view, $edit, $delete)";
+                        $sql = "INSERT INTO `roles_permissions`(`role_name`, `permission`, `p_create`, `p_view`, `p_edit`, `p_delete`) VALUES ('$roleName', '$permissionTypeEscaped', $create, $view, $edit, $delete)";
 
                         if (!mysqli_query($conn, $sql)) {
                             $success = false;
