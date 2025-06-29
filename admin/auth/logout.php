@@ -24,41 +24,12 @@ if ($requestMethod == 'POST') {
     $authHeader = getAuthorizationHeader();
     $cookieToken = $_COOKIE['authToken'] ?? '';
 
-    if (!isset($cookieToken) || empty($cookieToken)) {
-        $data = [
-            'status' => 401,
-            'message' => 'Authentication error'
-        ];
-        header("HTTP/1.0 401 Authentication error");
-        echo json_encode($data);
-    } else {
-        if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
-            $data = [
-                'status' => 401,
-                'message' => 'Missing or malformed Authorization token',
-            ];
-            header("HTTP/1.0 401 Unauthorized");
-            echo json_encode($data);
-        } else {
-            $frontendToken = $matches[1];
-            if ($cookieToken !== $frontendToken) {
-                $data = [
-                    'status' => 401,
-                    'message' => 'Authentication mismatch',
-                ];
-                header("HTTP/1.0 401 Unauthorized");
-                echo json_encode($data);
-            } else {
-                session_destroy();
-                setcookie("authToken", "", time() - 3600, "/", ".ticketbay.in", true, true);
-                $data = [
-                    'status' => 200,
-                    'message' => 'You have logged out successfylly.',
-                ];
-                header("HTTP/1.0 200 Logged Out");
-            }
-        }
-    }
+    $data = [
+        'status' => 200,
+        'message' => 'You have logged out successfylly.',
+        'token' => $cookieToken
+    ];
+    header("HTTP/1.0 200 Logged Out");
 } else{
     $data = [
         'status' => 405,
