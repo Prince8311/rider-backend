@@ -16,7 +16,7 @@ if ($requestMethod == 'OPTIONS') {
 
 require "../../utils/auth-helper.php";
 
-if($requestMethod == 'GET') {
+if ($requestMethod == 'POST') {
 
     require "../../_db-connect.php";
     global $conn;
@@ -49,17 +49,16 @@ if($requestMethod == 'GET') {
                 header("HTTP/1.0 401 Unauthorized");
                 echo json_encode($data);
             } else {
+                session_destroy();
+                setcookie("authToken", "", time() - 3600, "/", ".ticketbay.in", true, true);
                 $data = [
                     'status' => 200,
-                    'message' => 'Authenticated',
-                    'authToken' => $cookieToken
+                    'message' => 'You have logged out successfylly.',
                 ];
-                header("HTTP/1.0 200 Authenticated");
-                echo json_encode($data);
+                header("HTTP/1.0 200 Logged Out");
             }
         }
     }
-
 } else{
     $data = [
         'status' => 405,
