@@ -30,6 +30,7 @@ if ($requestMethod == 'POST') {
         'token' => $cookieToken
     ];
     header("HTTP/1.0 200 Logged Out");
+    echo json_encode($data);
 } else{
     $data = [
         'status' => 405,
