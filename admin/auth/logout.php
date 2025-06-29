@@ -53,7 +53,7 @@ if ($requestMethod == 'POST') {
                 setcookie("authToken", "", time() - 3600, "/", ".ticketbay.in", true, true);
                 $data = [
                     'status' => 200,
-                    'message' => 'You have logged out successfylly.',
+                    'message' => 'Logged out successfylly.',
                 ];
                 header("HTTP/1.0 200 Logged Out");
                 echo json_encode($data);
