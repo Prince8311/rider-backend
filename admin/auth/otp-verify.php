@@ -43,8 +43,8 @@ if($requestMethod == 'POST') {
         if($savedOtp == $otp) {
             $authToken = bin2hex(random_bytes(64));
             setcookie("authToken", $authToken, time() + 86400, "/", ".ticketbay.in", true, true);
-            $clearOtpSql = "UPDATE `users` SET `mail_otp` = NULL WHERE `id` = '$userId'";
-            $clearResult = mysqli_query($conn, $clearOtpSql);
+            $updateUserSql = "UPDATE `users` SET `mail_otp` = NULL, `token`='$authToken' WHERE `id` = '$userId'";
+            $updateUserResult = mysqli_query($conn, $updateUserSql);
             $data = [
                 'status' => 200,
                 'message' => 'Authectication Successful',
