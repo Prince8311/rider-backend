@@ -45,7 +45,7 @@ if ($requestMethod == 'POST') {
                     $userEmail = $row['email'];
                     $userType = $row['user_type'];
 
-                    if ($userType == "user_type" || $userType == "employee") {
+                    if ($userType == "super_admin" || $userType == "employee") {
                         $otp = rand(100000, 999999);
                         $otpPart1 = substr($otp, 0, 3);
                         $otpPart2 = substr($otp, 3, 3);
