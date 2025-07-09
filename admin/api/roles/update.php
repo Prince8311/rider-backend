@@ -56,7 +56,7 @@ if ($requestMethod == 'POST') {
                     $success = true;
 
                     $deleteSQL = "DELETE FROM `roles_permissions` WHERE `role_name` = '$roleName'";
-                    $deleteResult = mysqli_query($conn, $deleteResult);
+                    $deleteResult = mysqli_query($conn, $deleteSQL);
 
                     if ($deleteResult) {
                         foreach ($permissions as $permissionType => $perms) {
@@ -88,7 +88,7 @@ if ($requestMethod == 'POST') {
                                 'status' => 500,
                                 'message' => 'Database error: ' . $error
                             ];
-                            header("HTTP/1.0 500 Internal Server Errorrr");
+                            header("HTTP/1.0 500 Internal Server Error");
                             echo json_encode($data);
                         }
                     } else {
@@ -96,7 +96,7 @@ if ($requestMethod == 'POST') {
                             'status' => 500,
                             'message' => 'Failed to clear old permissions: ' . mysqli_error($conn)
                         ];
-                        header("HTTP/1.0 500 Internal Server Errorrrr");
+                        header("HTTP/1.0 500 Internal Server Error");
                         echo json_encode($data);
                     }
                 } else {
