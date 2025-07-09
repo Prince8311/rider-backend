@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 session_start();
 header('Access-Control-Allow-Origin: http://localhost:3000');
@@ -49,32 +49,31 @@ if ($requestMethod == 'GET') {
                 header("HTTP/1.0 401 Unauthorized");
                 echo json_encode($data);
             } else {
-                $sql = "SELECT rp.role_name, COUNT(u.id) AS user_count FROM ( SELECT DISTINCT role_name FROM roles_permissions) rp LEFT JOIN users u ON rp.role_name = u.user_role GROUP BY rp.role_name";
-                $result = mysqli_query($conn, $sql);
-                $roles = [];
+                if(isset($_GET['name'])){
+                    $roleName = mysqli_real_escape_string($conn, $_GET['name']);
+                    $sql = "SELECT * FROM `roles_permissions` WHERE `role_name`='$roleName'";
+                    $result = mysqli_query($conn, $sql);
+                    $permissions = mysqli_fetch_all($result, MYSQLI_ASSOC); 
 
-                if ($result) {
-                    while ($row = mysqli_fetch_assoc($result)) {
-                        $roles[] = $row;
-                    }
                     $data = [
                         'status' => 200,
-                        'message' => 'Role list fetched.',
-                        'roles' => $roles
+                        'message' => 'Role details fetched',
+                        'permissions' => $permissions
                     ];
-                    header("HTTP/1.0 200 Role list");
-                    echo json_encode($data);
+                    header("HTTP/1.0 200 Details fetched");
+                    echo json_encode($data); 
                 } else {
                     $data = [
-                        'status' => 500,
-                        'message' => 'Database error: ' . $error
+                        'status' => 400,
+                        'message' => 'No parameter found',
                     ];
-                    header("HTTP/1.0 500 Internal Server Error");
-                    echo json_encode($data);
+                    header("HTTP/1.0 400 No parameter");
+                    echo json_encode($data); 
                 }
             }
         }
     }
+
 } else {
     $data = [
         'status' => 405,
@@ -83,3 +82,5 @@ if ($requestMethod == 'GET') {
     header("HTTP/1.0 405 Method Not Allowed");
     echo json_encode($data);
 }
+
+?>
