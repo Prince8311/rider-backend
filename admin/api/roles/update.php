@@ -79,7 +79,7 @@ if ($requestMethod == 'POST') {
                         if ($success) {
                             $data = [
                                 'status' => 200,
-                                'message' => 'Role created successfully.'
+                                'message' => 'Role updated successfully.'
                             ];
                             header("HTTP/1.0 200 OK");
                             echo json_encode($data);
