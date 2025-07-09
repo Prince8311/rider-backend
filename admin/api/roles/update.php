@@ -88,7 +88,7 @@ if ($requestMethod == 'POST') {
                                 'status' => 500,
                                 'message' => 'Database error: ' . $error
                             ];
-                            header("HTTP/1.0 500 Internal Server Error");
+                            header("HTTP/1.0 500 Internal Server Errorrr");
                             echo json_encode($data);
                         }
                     } else {
@@ -96,7 +96,7 @@ if ($requestMethod == 'POST') {
                             'status' => 500,
                             'message' => 'Failed to clear old permissions: ' . mysqli_error($conn)
                         ];
-                        header("HTTP/1.0 500 Internal Server Error");
+                        header("HTTP/1.0 500 Internal Server Errorrrr");
                         echo json_encode($data);
                     }
                 } else {
