@@ -24,6 +24,57 @@ if($requestMethod == 'GET') {
     $authHeader = getAuthorizationHeader();
     $cookieToken = $_COOKIE['authToken'] ?? '';
 
+    if (!isset($cookieToken) || empty($cookieToken)) {
+        $data = [
+            'status' => 401,
+            'message' => 'Authentication error'
+        ];
+        header("HTTP/1.0 401 Authentication error");
+        echo json_encode($data);
+    } else {
+        if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+            $data = [
+                'status' => 401,
+                'message' => 'Missing or malformed Authorization token',
+            ];
+            header("HTTP/1.0 401 Unauthorized");
+            echo json_encode($data);
+        } else {
+            $frontendToken = $matches[1];
+            if (empty($cookieToken) || $cookieToken !== $frontendToken) {
+                $data = [
+                    'status' => 401,
+                    'message' => 'Authentication mismatch',
+                ];
+                header("HTTP/1.0 401 Unauthorized");
+                echo json_encode($data);
+            } else {
+                $sql = "SELECT * FROM `users` WHERE `user_type`='employee'";
+                $result = mysqli_query($conn, $sql);
+                $totalEmployees = mysqli_num_rows($result);
+                $limit = 10; 
+                $page = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0
+                ? (int)$_GET['page']
+                : 1;
+                $offset = ($page - 1) * $limit;
+
+                $limitSql = "SELECT * FROM `users` WHERE `user_type`='employee' LIMIT $limit OFFSET $offset";
+                $limitResult = mysqli_query($conn, $limitSql);
+                $employees = mysqli_fetch_all($limitResult, MYSQLI_ASSOC);
+
+                $data = [
+                    'status' => 200,
+                    'message' => 'Employee list fetched',
+                    'totalCount' => $totalEmployees,
+                    'currentPage' => $page,
+                    'users' => $employees,
+                ];
+                header("HTTP/1.0 200 Employee list");
+                echo json_encode($data);
+            }
+        }
+    }
+
 } else{
     $data = [
         'status' => 405,
