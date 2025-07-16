@@ -24,6 +24,52 @@ if($requestMethod == 'POST') {
     $authHeader = getAuthorizationHeader();
     $cookieToken = $_COOKIE['authToken'] ?? '';
 
+    if (!isset($cookieToken) || empty($cookieToken)) {
+        $data = [
+            'status' => 401,
+            'message' => 'Authentication error'
+        ];
+        header("HTTP/1.0 401 Authentication error");
+        echo json_encode($data);
+    } else {
+        if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+            $data = [
+                'status' => 401,
+                'message' => 'Missing or malformed Authorization token',
+            ];
+            header("HTTP/1.0 401 Unauthorized");
+            echo json_encode($data);
+        } else {
+            $frontendToken = $matches[1];
+            if (empty($cookieToken) || $cookieToken !== $frontendToken) {
+                $data = [
+                    'status' => 401,
+                    'message' => 'Authentication mismatch',
+                ];
+                header("HTTP/1.0 401 Unauthorized");
+                echo json_encode($data);
+            } else {
+                $inputData = json_decode(file_get_contents("php://input"), true);
+                if (!empty($inputData)) {
+                    $userType = 'employee';
+                    $empName = mysqli_real_escape_string($conn, $inputData['name']);
+                    $empPhone = mysqli_real_escape_string($conn, $inputData['phone']);
+                    $empMail = mysqli_real_escape_string($conn, $inputData['email']);
+                    $empRole = mysqli_real_escape_string($conn, $inputData['roleName']);
+                    $password = mysqli_real_escape_string($conn, $inputData['password']);
+                    $confirmPassword = mysqli_real_escape_string($conn, $inputData['confirmPassword']);
+                } else {
+                    $data = [
+                        'status' => 400,
+                        'message' => 'Validation error'
+                    ];
+                    header("HTTP/1.0 400 Validation error");
+                    echo json_encode($data);
+                }
+            }
+        }
+    }
+
 } else{
     $data = [
         'status' => 405,
