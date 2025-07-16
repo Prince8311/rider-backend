@@ -53,7 +53,7 @@ if($requestMethod == 'GET') {
         'message' => 'Employee list fetched',
         'totalCount' => $totalEmployees,
         'currentPage' => $page,
-        'employees' => $employees,
+        'employeesssss' => $employees,
     ];
     header("HTTP/1.0 200 Employee list");
     echo json_encode($data);
