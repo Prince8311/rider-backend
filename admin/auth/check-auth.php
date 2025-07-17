@@ -14,7 +14,7 @@ if ($requestMethod == 'OPTIONS') {
     exit();
 }
 
-require "../../utils/auth-check.php";
+require "../../utils/middleware.php";
 
 $authResult = authenticateRequest();
 
