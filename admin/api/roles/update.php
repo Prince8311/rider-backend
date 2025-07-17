@@ -85,9 +85,9 @@ if ($requestMethod == 'POST') {
     } else {
         $data = [
             'status' => 400,
-            'message' => 'Validation error'
+            'message' => 'Empty request data'
         ];
-        header("HTTP/1.0 400 Validation error");
+        header("HTTP/1.0 400 Bad Request");
         echo json_encode($data);
     }
 } else {
@@ -98,3 +98,5 @@ if ($requestMethod == 'POST') {
     header("HTTP/1.0 405 Method Not Allowed");
     echo json_encode($data);
 }
+
+?>
