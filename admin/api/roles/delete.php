@@ -36,23 +36,35 @@ if ($requestMethod == 'POST') {
     if (!empty($inputData)) {
         $roleName = mysqli_real_escape_string($conn, $inputData['roleName']);
 
-        $deleteSQL = "DELETE FROM `roles_permissions` WHERE `role_name` = '$roleName'";
-        $deleteResult = mysqli_query($conn, $deleteSQL);
+        $checkUserSql = "SELECT * FROM `users` WHERE `user_role` = '$roleName'";
+        $checkResult = mysqli_query($conn, $checkUserSql);
 
-        if ($deleteResult) {
+        if(mysqli_num_rows($checkResult) > 0) {
             $data = [
-                'status' => 200,
-                'message' => 'Role deleted successfully.'
+                'status' => 400,
+                'message' => 'Employee exits with this role.'
             ];
-            header("HTTP/1.0 200 Role deleted");
+            header("HTTP/1.0 400 Bad Request");
             echo json_encode($data);
         } else {
-            $data = [
-                'status' => 500,
-                'message' => 'Database error: ' . $error
-            ];
-            header("HTTP/1.0 500 Internal Server Error");
-            echo json_encode($data);
+            $deleteSQL = "DELETE FROM `roles_permissions` WHERE `role_name` = '$roleName'";
+            $deleteResult = mysqli_query($conn, $deleteSQL);
+    
+            if ($deleteResult) {
+                $data = [
+                    'status' => 200,
+                    'message' => 'Role deleted successfully.'
+                ];
+                header("HTTP/1.0 200 Role deleted");
+                echo json_encode($data);
+            } else {
+                $data = [
+                    'status' => 500,
+                    'message' => 'Database error: ' . $error
+                ];
+                header("HTTP/1.0 500 Internal Server Error");
+                echo json_encode($data);
+            }
         }
     } else {
         $data = [
