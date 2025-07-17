@@ -132,7 +132,7 @@ if ($requestMethod == 'POST') {
                     } else {
                         $data = [
                             'status' => 400,
-                            'message' => 'Authentication denied ! You must be super admin or employee.',
+                            'message' => 'Authentication denied!! You must be Super Admin or Employee.',
                         ];
                         header("HTTP/1.0 400 Forbidden");
                         echo json_encode($data);

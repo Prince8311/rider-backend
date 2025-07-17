@@ -33,7 +33,7 @@ if ($requestMethod == 'POST') {
     global $conn;
 
     $token = $authResult['token'];
-    $sql = "UPDATE `users` SET `token`='' WHERE `token`='$token'";
+    $sql = "UPDATE `users` SET `token`= NULL  WHERE `token`='$token'";
     session_destroy();
     setcookie("authToken", "", time() - 3600, "/", ".ticketbay.in", true, true);
     $data = [
