@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 session_start();
 header('Access-Control-Allow-Origin: http://localhost:3000');
@@ -14,69 +14,76 @@ if ($requestMethod == 'OPTIONS') {
     exit();
 }
 
-require "../../../utils/auth-helper.php";
+require "../../../utils/middleware.php";
 
-if($requestMethod == 'POST') {
+$authResult = authenticateRequest();
 
+if (!$authResult['authenticated']) {
+    $data = [
+        'status' => $authResult['status'],
+        'message' => $authResult['message']
+    ];
+    header("HTTP/1.0 " . $authResult['status']);
+    echo json_encode($data);
+    exit;
+}
+
+if ($requestMethod == 'POST') {
     require "../../../_db-connect.php";
     global $conn;
 
-    $authHeader = getAuthorizationHeader();
-    $cookieToken = $_COOKIE['authToken'] ?? '';
+    $inputData = json_decode(file_get_contents("php://input"), true);
+    if (!empty($inputData)) {
+        $userType = 'employee';
+        $empName = mysqli_real_escape_string($conn, $inputData['name']);
+        $empPhone = mysqli_real_escape_string($conn, $inputData['phone']);
+        $empMail = mysqli_real_escape_string($conn, $inputData['email']);
+        $empRole = mysqli_real_escape_string($conn, $inputData['roleName']);
+        $password = mysqli_real_escape_string($conn, $inputData['password']);
+        $confirmPassword = mysqli_real_escape_string($conn, $inputData['confirmPassword']);
+        $status = 0;
 
-    if (!isset($cookieToken) || empty($cookieToken)) {
-        $data = [
-            'status' => 401,
-            'message' => 'Authentication error'
-        ];
-        header("HTTP/1.0 401 Authentication error");
-        echo json_encode($data);
-    } else {
-        if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
-            $data = [
-                'status' => 401,
-                'message' => 'Missing or malformed Authorization token',
-            ];
-            header("HTTP/1.0 401 Unauthorized");
-            echo json_encode($data);
-        } else {
-            $frontendToken = $matches[1];
-            if (empty($cookieToken) || $cookieToken !== $frontendToken) {
+        if($password == $confirmPassword) {
+            $hashPass = password_hash($password,PASSWORD_DEFAULT);
+            $sql = "INSERT INTO `users`(`name`, `email`, `phone`, `password`, `status`, `user_type`, `user_role`) VALUES ('$empName','$empMail','$empPhone','$hashPass','$status','$userType','$empRole')";
+            $result = mysqli_query($conn, $sql);
+
+            if($result) {
                 $data = [
-                    'status' => 401,
-                    'message' => 'Authentication mismatch',
+                    'status' => 200,
+                    'message' => 'Employee created successfully.'
                 ];
-                header("HTTP/1.0 401 Unauthorized");
+                header("HTTP/1.0 200 OK");
                 echo json_encode($data);
             } else {
-                $inputData = json_decode(file_get_contents("php://input"), true);
-                if (!empty($inputData)) {
-                    $userType = 'employee';
-                    $empName = mysqli_real_escape_string($conn, $inputData['name']);
-                    $empPhone = mysqli_real_escape_string($conn, $inputData['phone']);
-                    $empMail = mysqli_real_escape_string($conn, $inputData['email']);
-                    $empRole = mysqli_real_escape_string($conn, $inputData['roleName']);
-                    $password = mysqli_real_escape_string($conn, $inputData['password']);
-                    $confirmPassword = mysqli_real_escape_string($conn, $inputData['confirmPassword']);
-                } else {
-                    $data = [
-                        'status' => 400,
-                        'message' => 'Validation error'
-                    ];
-                    header("HTTP/1.0 400 Validation error");
-                    echo json_encode($data);
-                }
+                $data = [
+                    'status' => 500,
+                    'message' => 'Database error: ' . $error
+                ];
+                header("HTTP/1.0 500 Internal Server Error");
+                echo json_encode($data);
             }
+        } else {
+            $data = [
+                'status' => 400,
+                'message' => 'Password mismatch'
+            ];
+            header("HTTP/1.0 400 Validation error");
+            echo json_encode($data);
         }
+    } else {
+        $data = [
+            'status' => 400,
+            'message' => 'Validation error'
+        ];
+        header("HTTP/1.0 400 Validation error");
+        echo json_encode($data);
     }
-
-} else{
+} else {
     $data = [
         'status' => 405,
-        'message' => $requestMethod. ' Method Not Allowed',
+        'message' => $requestMethod . ' Method Not Allowed',
     ];
     header("HTTP/1.0 405 Method Not Allowed");
     echo json_encode($data);
 }
-
-?>

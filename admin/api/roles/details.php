@@ -14,64 +14,44 @@ if ($requestMethod == 'OPTIONS') {
     exit();
 }
 
-require "../../../utils/auth-helper.php";
+require "../../../utils/middleware.php";
+
+$authResult = authenticateRequest();
+
+if (!$authResult['authenticated']) {
+    $data = [
+        'status' => $authResult['status'],
+        'message' => $authResult['message']
+    ];
+    header("HTTP/1.0 " . $authResult['status']);
+    echo json_encode($data);
+    exit;
+}
 
 if ($requestMethod == 'GET') {
-
     require "../../../_db-connect.php";
     global $conn;
 
-    $authHeader = getAuthorizationHeader();
-    $cookieToken = $_COOKIE['authToken'] ?? '';
+    if(isset($_GET['name'])){
+        $roleName = mysqli_real_escape_string($conn, $_GET['name']);
+        $sql = "SELECT * FROM `roles_permissions` WHERE `role_name`='$roleName'";
+        $result = mysqli_query($conn, $sql);
+        $permissions = mysqli_fetch_all($result, MYSQLI_ASSOC); 
 
-    if (!isset($cookieToken) || empty($cookieToken)) {
         $data = [
-            'status' => 401,
-            'message' => 'Authentication error'
+            'status' => 200,
+            'message' => 'Role details fetched',
+            'permissions' => $permissions
         ];
-        header("HTTP/1.0 401 Authentication error");
-        echo json_encode($data);
+        header("HTTP/1.0 200 Details fetched");
+        echo json_encode($data); 
     } else {
-        if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
-            $data = [
-                'status' => 401,
-                'message' => 'Missing or malformed Authorization token',
-            ];
-            header("HTTP/1.0 401 Unauthorized");
-            echo json_encode($data);
-        } else {
-            $frontendToken = $matches[1];
-            if (empty($cookieToken) || $cookieToken !== $frontendToken) {
-                $data = [
-                    'status' => 401,
-                    'message' => 'Authentication mismatch',
-                ];
-                header("HTTP/1.0 401 Unauthorized");
-                echo json_encode($data);
-            } else {
-                if(isset($_GET['name'])){
-                    $roleName = mysqli_real_escape_string($conn, $_GET['name']);
-                    $sql = "SELECT * FROM `roles_permissions` WHERE `role_name`='$roleName'";
-                    $result = mysqli_query($conn, $sql);
-                    $permissions = mysqli_fetch_all($result, MYSQLI_ASSOC); 
-
-                    $data = [
-                        'status' => 200,
-                        'message' => 'Role details fetched',
-                        'permissions' => $permissions
-                    ];
-                    header("HTTP/1.0 200 Details fetched");
-                    echo json_encode($data); 
-                } else {
-                    $data = [
-                        'status' => 400,
-                        'message' => 'No parameter found',
-                    ];
-                    header("HTTP/1.0 400 No parameter");
-                    echo json_encode($data); 
-                }
-            }
-        }
+        $data = [
+            'status' => 400,
+            'message' => 'No parameter found',
+        ];
+        header("HTTP/1.0 400 No parameter");
+        echo json_encode($data); 
     }
 
 } else {

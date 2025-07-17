@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 session_start();
 header('Access-Control-Allow-Origin: http://localhost:3000');
@@ -14,75 +14,54 @@ if ($requestMethod == 'OPTIONS') {
     exit();
 }
 
-require "../../../utils/auth-helper.php";
+require "../../../utils/middleware.php";
+
+$authResult = authenticateRequest();
+
+if (!$authResult['authenticated']) {
+    $data = [
+        'status' => $authResult['status'],
+        'message' => $authResult['message']
+    ];
+    header("HTTP/1.0 " . $authResult['status']);
+    echo json_encode($data);
+    exit;
+}
 
 if ($requestMethod == 'POST') {
-
     require "../../../_db-connect.php";
     global $conn;
 
-    $authHeader = getAuthorizationHeader();
-    $cookieToken = $_COOKIE['authToken'] ?? '';
+    $inputData = json_decode(file_get_contents("php://input"), true);
+    if (!empty($inputData)) {
+        $roleName = mysqli_real_escape_string($conn, $inputData['roleName']);
 
-    if (!isset($cookieToken) || empty($cookieToken)) {
-        $data = [
-            'status' => 401,
-            'message' => 'Authentication error'
-        ];
-        header("HTTP/1.0 401 Authentication error");
-        echo json_encode($data);
-    } else {
-        if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+        $deleteSQL = "DELETE FROM `roles_permissions` WHERE `role_name` = '$roleName'";
+        $deleteResult = mysqli_query($conn, $deleteSQL);
+
+        if ($deleteResult) {
             $data = [
-                'status' => 401,
-                'message' => 'Missing or malformed Authorization token',
+                'status' => 200,
+                'message' => 'Role deleted successfully.'
             ];
-            header("HTTP/1.0 401 Unauthorized");
+            header("HTTP/1.0 200 Role deleted");
             echo json_encode($data);
         } else {
-            $frontendToken = $matches[1];
-            if (empty($cookieToken) || $cookieToken !== $frontendToken) {
-                $data = [
-                    'status' => 401,
-                    'message' => 'Authentication mismatch',
-                ];
-                header("HTTP/1.0 401 Unauthorized");
-                echo json_encode($data);
-            } else {
-                $inputData = json_decode(file_get_contents("php://input"), true);
-                if (!empty($inputData)) {
-                    $roleName = mysqli_real_escape_string($conn, $inputData['roleName']);
-
-                    $deleteSQL = "DELETE FROM `roles_permissions` WHERE `role_name` = '$roleName'";
-                    $deleteResult = mysqli_query($conn, $deleteSQL);
-
-                    if($deleteResult) {
-                        $data = [
-                            'status' => 200,
-                            'message' => 'Role deleted successfully.'
-                        ];
-                        header("HTTP/1.0 200 Role deleted");
-                        echo json_encode($data);
-                    } else {
-                        $data = [
-                            'status' => 500,
-                            'message' => 'Database error: ' . $error
-                        ];
-                        header("HTTP/1.0 500 Internal Server Error");
-                        echo json_encode($data);
-                    }
-                } else {
-                    $data = [
-                        'status' => 400,
-                        'message' => 'Validation error'
-                    ];
-                    header("HTTP/1.0 400 Validation error");
-                    echo json_encode($data);
-                }
-            }
+            $data = [
+                'status' => 500,
+                'message' => 'Database error: ' . $error
+            ];
+            header("HTTP/1.0 500 Internal Server Error");
+            echo json_encode($data);
         }
+    } else {
+        $data = [
+            'status' => 400,
+            'message' => 'Validation error'
+        ];
+        header("HTTP/1.0 400 Validation error");
+        echo json_encode($data);
     }
-
 } else {
     $data = [
         'status' => 405,
@@ -91,5 +70,3 @@ if ($requestMethod == 'POST') {
     header("HTTP/1.0 405 Method Not Allowed");
     echo json_encode($data);
 }
-
-?>
