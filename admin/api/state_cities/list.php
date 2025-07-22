@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 session_start();
 header('Access-Control-Allow-Origin: http://localhost:3000');
@@ -32,22 +32,33 @@ if ($requestMethod == 'GET') {
     require "../../../_db-connect.php";
     global $conn;
 
-    $sql = "SELECT state, cities AS city FROM state_cities ORDER BY state, city";
-    $result = mysqli_query($conn, $sql);
+    $limit = 10;
+    $page = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0
+        ? (int)$_GET['page']
+        : 1;
+    $offset = ($page - 1) * $limit;
 
-    if (!$result) {
-        $data = [
-            'status' => 500,
-            'message' => 'Database error: ' . mysqli_error($conn)
-        ];
-        header("HTTP/1.0 500 Internal Server Error");
-        echo json_encode($data);
-        exit;
+    // First, get total distinct states
+    $totalResult = mysqli_query($conn, "SELECT COUNT(DISTINCT state) AS total FROM state_cities");
+    $totalRow = mysqli_fetch_assoc($totalResult);
+    $totalStates = (int)$totalRow['total'];
+
+    // Fetch paginated distinct states
+    $statesSql = "SELECT DISTINCT state FROM state_cities ORDER BY state ASC LIMIT $limit OFFSET $offset";
+    $statesResult = mysqli_query($conn, $statesSql);
+    $states = [];
+    while ($row = mysqli_fetch_assoc($statesResult)) {
+        $states[] = $row['state'];
     }
+
+    // Fetch cities for selected states
+    $statesInClause = "'" . implode("','", array_map('mysqli_real_escape_string', array_fill(0, count($states), $conn), $states)) . "'";
+    $citiesSql = "SELECT state, cities AS city FROM state_cities WHERE state IN ($statesInClause) ORDER BY state, city";
+    $citiesResult = mysqli_query($conn, $citiesSql);
 
     $grouped = [];
 
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = mysqli_fetch_assoc($citiesResult)) {
         $state = $row['state'];
         $city = $row['city'];
 
@@ -66,7 +77,9 @@ if ($requestMethod == 'GET') {
     $data = [
         'status' => 200,
         'message' => 'States and cities fetched successfully.',
-        'data' => $responseData
+        'totalCount' => $totalStates,
+        'currentPage' => $page,
+        'states' => $responseData
     ];
 
     header("HTTP/1.0 200 OK");
@@ -79,5 +92,3 @@ if ($requestMethod == 'GET') {
     header("HTTP/1.0 405 Method Not Allowed");
     echo json_encode($data);
 }
-
-?>

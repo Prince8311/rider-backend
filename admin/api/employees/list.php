@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 session_start();
 header('Access-Control-Allow-Origin: http://localhost:3000');
@@ -28,66 +28,40 @@ if (!$authResult['authenticated']) {
     exit;
 }
 
-if ($requestMethod == 'GET') {
+if($requestMethod == 'GET') {
     require "../../../_db-connect.php";
     global $conn;
 
-    $limit = 10;
+    $authHeader = getAuthorizationHeader();
+    $cookieToken = $_COOKIE['authToken'] ?? '';
+
+    $sql = "SELECT * FROM `users` WHERE `user_type`='employee'";
+    $result = mysqli_query($conn, $sql);
+    $totalEmployees = mysqli_num_rows($result);
+    $limit = 10; 
     $page = isset($_GET['page']) && is_numeric($_GET['page']) && $_GET['page'] > 0
-        ? (int)$_GET['page']
-        : 1;
+    ? (int)$_GET['page']
+    : 1;
     $offset = ($page - 1) * $limit;
 
-    // First, get total distinct states
-    $totalResult = mysqli_query($conn, "SELECT COUNT(DISTINCT state) AS total FROM state_cities");
-    $totalRow = mysqli_fetch_assoc($totalResult);
-    $totalStates = (int)$totalRow['total'];
-
-    // Fetch paginated distinct states
-    $statesSql = "SELECT DISTINCT state FROM state_cities ORDER BY state ASC LIMIT $limit OFFSET $offset";
-    $statesResult = mysqli_query($conn, $statesSql);
-    $states = [];
-    while ($row = mysqli_fetch_assoc($statesResult)) {
-        $states[] = $row['state'];
-    }
-
-    // Fetch cities for selected states
-    $statesInClause = "'" . implode("','", array_map('mysqli_real_escape_string', array_fill(0, count($states), $conn), $states)) . "'";
-    $citiesSql = "SELECT state, cities AS city FROM state_cities WHERE state IN ($statesInClause) ORDER BY state, city";
-    $citiesResult = mysqli_query($conn, $citiesSql);
-
-    $grouped = [];
-
-    while ($row = mysqli_fetch_assoc($citiesResult)) {
-        $state = $row['state'];
-        $city = $row['city'];
-
-        if (!isset($grouped[$state])) {
-            $grouped[$state] = [
-                "state" => $state,
-                "cities" => []
-            ];
-        }
-
-        $grouped[$state]["cities"][] = $city;
-    }
-
-    $responseData = array_values($grouped); 
+    $limitSql = "SELECT * FROM `users` WHERE `user_type`='employee' LIMIT $limit OFFSET $offset";
+    $limitResult = mysqli_query($conn, $limitSql);
+    $employees = mysqli_fetch_all($limitResult, MYSQLI_ASSOC);
 
     $data = [
         'status' => 200,
-        'message' => 'States and cities fetched successfullyyyy.',
-        'totalCount' => $totalStates,
+        'message' => 'Employee list fetched',
+        'totalCount' => $totalEmployees,
         'currentPage' => $page,
-        'statesCities' => $responseData
+        'employees' => $employees,
     ];
-
-    header("HTTP/1.0 200 OK");
+    header("HTTP/1.0 200 Employee list");
     echo json_encode($data);
-} else {
+
+} else{
     $data = [
         'status' => 405,
-        'message' => $requestMethod . ' Method Not Allowed',
+        'message' => $requestMethod. ' Method Not Allowed',
     ];
     header("HTTP/1.0 405 Method Not Allowed");
     echo json_encode($data);
