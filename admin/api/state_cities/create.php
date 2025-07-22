@@ -37,18 +37,6 @@ if ($requestMethod == 'POST') {
         $state = mysqli_real_escape_string($conn, $inputData['state']);
         $city = mysqli_real_escape_string($conn, $inputData['city']);
 
-        $checkSql = "SELECT * FROM `state_cities` WHERE `cities`='$city' AND `state`='$state'";
-        $checkResult = mysqli_query($conn, $checkResult);
-
-        if(mysqli_num_rows($checkResult) > 0) {
-            $data = [
-                'status' => 400,
-                'message' => 'City already exists'
-            ];
-            header("HTTP/1.0 400 City exists");
-            echo json_encode($data);
-            exit;
-        }
 
         $sql = "INSERT INTO `state_cities`(`state`, `cities`) VALUES ('$state','$city')";
         $result = mysqli_query($conn, $sql);
