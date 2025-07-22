@@ -79,7 +79,7 @@ if ($requestMethod == 'GET') {
         'message' => 'States and cities fetched successfully.',
         'totalCount' => $totalStates,
         'currentPage' => $page,
-        'states' => $responseData
+        'stateCities' => $responseData
     ];
 
     header("HTTP/1.0 200 OK");
