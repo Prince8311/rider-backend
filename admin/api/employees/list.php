@@ -76,7 +76,7 @@ if ($requestMethod == 'GET') {
 
     $data = [
         'status' => 200,
-        'message' => 'States and cities fetched successfully.',
+        'message' => 'States and cities fetched successfullyyyy.',
         'totalCount' => $totalStates,
         'currentPage' => $page,
         'statesCities' => $responseData
