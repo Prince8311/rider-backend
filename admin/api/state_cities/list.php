@@ -53,7 +53,7 @@ if ($requestMethod == 'GET') {
 
     // Fetch cities for selected states
     $statesInClause = "'" . implode("','", array_map('mysqli_real_escape_string', array_fill(0, count($states), $conn), $states)) . "'";
-    $citiesSql = "SELECT state, cities AS city FROM state_cities WHERE state IN ($statesInClause) ORDER BY state, city";
+    $citiesSql = "SELECT state, city AS city FROM state_cities WHERE state IN ($statesInClause) ORDER BY state, city";
     $citiesResult = mysqli_query($conn, $citiesSql);
 
     $grouped = [];

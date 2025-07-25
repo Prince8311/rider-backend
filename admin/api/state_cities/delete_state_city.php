@@ -34,36 +34,41 @@ if ($requestMethod == 'POST') {
 
     $inputData = json_decode(file_get_contents("php://input"), true);
     if (!empty($inputData)) {
-        $state = mysqli_real_escape_string($conn, $inputData['state']);
-        $city = mysqli_real_escape_string($conn, $inputData['city']);
+        $name = mysqli_real_escape_string($conn, $inputData['name'] ?? '');
+        $isState = filter_var($inputData['isState'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $successMessage = '';
 
-        $checkSql = "SELECT * FROM `state_cities` WHERE `state`='$state' AND `city`='$city'";
-        $checkResult = mysqli_query($conn, $checkSql);
-
-        if(mysqli_num_rows($checkResult) > 0) {
+        if (empty($name)) {
             $data = [
                 'status' => 400,
-                'message' => 'City already exists'
+                'message' => 'Name is required.'
             ];
-            header("HTTP/1.0 400 City exists");
+            header("HTTP/1.0 400 Bad Request");
             echo json_encode($data);
             exit;
         }
 
-        $sql = "INSERT INTO `state_cities`(`state`, `city`) VALUES ('$state','$city')";
+        if ($isState) {
+            $sql = "DELETE FROM `state_cities` WHERE `state`='$name'";
+            $successMessage = 'State deleted successfully.';
+        } else {
+            $sql = "DELETE FROM `state_cities` WHERE `city`='$name'";
+            $successMessage = 'City deleted successfully.';
+        }
+
         $result = mysqli_query($conn, $sql);
 
         if($result) {
             $data = [
                 'status' => 200,
-                'message' => 'City added successfully.'
+                'message' => $successMessage
             ];
-            header("HTTP/1.0 200 Ok");
+            header("HTTP/1.0 200 OK");
             echo json_encode($data);
         } else {
             $data = [
                 'status' => 500,
-                'message' => 'Database error: ' . $error
+                'message' => 'Database error: ' . mysqli_error($conn)
             ];
             header("HTTP/1.0 500 Internal Server Error");
             echo json_encode($data);
