@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 session_start();
 header('Access-Control-Allow-Origin: http://localhost:3000');
@@ -38,17 +38,22 @@ if ($requestMethod == 'POST') {
         $currentCityName = mysqli_real_escape_string($conn, $inputData['currentCityName'] ?? '');
         $newCityName = mysqli_real_escape_string($conn, $inputData['newCityName'] ?? '');
 
-        $checkSql  = "SELECT * FROM `state_cities` WHERE `state`='$stateName' AND `city`='$currentCityName'";
-        $checkResult = mysqli_query($conn, $checkSql);
+        $updateSql = "UPDATE `state_cities` SET `city`='$newCityName' WHERE `state`='$stateName' AND `city`='$currentCityName'";
+        $updateResult = mysqli_query($conn, $updateSql);
 
-        if (mysqli_num_rows($checkResult) > 0) {
-            $row = mysqli_fetch_assoc($checkResult);
+        if($updateResult) {
             $data = [
                 'status' => 200,
-                'message' => 'The Row Data',
-                'row' => $row
+                'message' => 'City name updated successfully.'
             ];
             header("HTTP/1.0 200 OK");
+            echo json_encode($data);
+        } else {
+            $data = [
+                'status' => 500,
+                'message' => 'Database error: ' . mysqli_error($conn)
+            ];
+            header("HTTP/1.0 500 Internal Server Error");
             echo json_encode($data);
         }
     } else {
@@ -67,3 +72,5 @@ if ($requestMethod == 'POST') {
     header("HTTP/1.0 405 Method Not Allowed");
     echo json_encode($data);
 }
+
+?>
