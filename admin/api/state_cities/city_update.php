@@ -34,24 +34,17 @@ if ($requestMethod == 'POST') {
 
     $inputData = json_decode(file_get_contents("php://input"), true);
     if (!empty($inputData)) {
-        $name = mysqli_real_escape_string($conn, $inputData['name'] ?? '');
-        $isState = filter_var($inputData['isState'] ?? false, FILTER_VALIDATE_BOOLEAN);
-        $successMessage = '';
+        $stateName = mysqli_real_escape_string($conn, $inputData['stateName'] ?? '');
+        $currentCityName = mysqli_real_escape_string($conn, $inputData['currentCityName'] ?? '');
+        $newCityName = mysqli_real_escape_string($conn, $inputData['newCityName'] ?? '');
 
-        if ($isState) {
-            $sql = "DELETE FROM `state_cities` WHERE `state`='$name'";
-            $successMessage = 'State deleted successfully.';
-        } else {
-            $sql = "DELETE FROM `state_cities` WHERE `city`='$name'";
-            $successMessage = 'City deleted successfully.';
-        }
+        $updateSql = "UPDATE `state_cities` SET `city`='$newCityName' WHERE `state`='$stateName' AND `city`='$currentCityName'";
+        $updateResult = mysqli_query($conn, $updateSql);
 
-        $result = mysqli_query($conn, $sql);
-
-        if($result) {
+        if($updateResult) {
             $data = [
                 'status' => 200,
-                'message' => $successMessage
+                'message' => 'City name updated successfully.'
             ];
             header("HTTP/1.0 200 OK");
             echo json_encode($data);
