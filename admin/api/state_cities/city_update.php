@@ -44,7 +44,7 @@ if ($requestMethod == 'POST') {
         if($updateResult) {
             $data = [
                 'status' => 200,
-                'message' => 'City name updated successfully.'
+                'message' => 'City name updated.'
             ];
             header("HTTP/1.0 200 OK");
             echo json_encode($data);
