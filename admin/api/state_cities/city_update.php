@@ -41,7 +41,7 @@ if ($requestMethod == 'POST') {
         $updateSql = "UPDATE `state_cities` SET `city`='$newCityName' WHERE `state`='$stateName' AND `city`='$currentCityName'";
         $updateResult = mysqli_query($conn, $updateSql);
 
-        if($updateResult) {
+        if($updateResult && mysqli_affected_rows($conn) > 0) {
             $data = [
                 'status' => 200,
                 'message' => 'City name updated successfully.'
